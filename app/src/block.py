@@ -1,5 +1,6 @@
 from src.utils import little_endian_to_int
-
+from src.utils import int_to_little_endian
+from src.utils import hash256
 
 class Block:
     def __init__(self, version, prev_block, merkle_root, timestamp, bits, nonce):
@@ -19,3 +20,15 @@ class Block:
         bits = little_endian_to_int(stream.read(4))
         nonce = little_endian_to_int(stream.read(4))
         return cls(version, prev_block, merkle_root, timestamp, bits, nonce)
+
+    def hash(self):
+        hash = hash256(
+            int_to_little_endian(self.version, 4)
+            + self.prev_block
+            + self.merkle_root
+            + int_to_little_endian(self.timestamp, 4)
+            + int_to_little_endian(self.bits, 4)
+            + int_to_little_endian(self.nonce, 4)
+        )
+        inverted = hash[::-1].hex()
+        return inverted
