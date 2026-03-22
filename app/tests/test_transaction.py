@@ -25,3 +25,29 @@ class TransactionTest(unittest.TestCase):
             '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b',
             transaction.transaction_id()
         )
+
+    def test_output_amount(self):
+        stream = io.BytesIO(self.genesis_block)
+        block = Block.parse(stream)
+        transaction = block.transactions[0]
+
+        self.assertEqual(
+            5000000000,
+            transaction.outputs[0].amount
+        )
+
+    def test_output_prev_transaction(self):
+        stream = io.BytesIO(self.genesis_block)
+        block = Block.parse(stream)
+        transaction = block.transactions[0]
+
+        expected = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        expected += b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        self.assertEqual(expected, transaction.inputs[0].prev_tx)
+
+    def test_segwit_false(self):
+        stream = io.BytesIO(self.genesis_block)
+        block = Block.parse(stream)
+        transaction = block.transactions[0]
+
+        self.assertFalse(transaction.segwit)

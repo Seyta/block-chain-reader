@@ -21,3 +21,23 @@ class BLockTest(unittest.TestCase):
         hash = block.hash()
 
         self.assertEqual('000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f', hash)
+
+    def test_pow(self):
+        stream = io.BytesIO(self.genesis_block)
+        block = Block.parse(stream)
+
+        self.assertTrue(block.check_pow())
+
+    def test_merkle_root(self):
+        stream = io.BytesIO(self.genesis_block)
+        block = Block.parse(stream)
+
+        self.assertTrue(block.check_merkle_root() == block.merkle_root)
+
+    def test_prev_block(self):
+        stream = io.BytesIO(self.genesis_block)
+        block = Block.parse(stream)
+
+        expected = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        expected += b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        self.assertEqual(expected, block.prev_block)
