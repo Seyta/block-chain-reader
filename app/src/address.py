@@ -63,5 +63,7 @@ def hash_to_address(script_type, hash_bytes):
         return base58check_encode(b'\x05' + hash_bytes)
     elif script_type == 'P2WPKH' :
         return bech32_encode('bc', hash_bytes)
+    elif script_type == 'OP_RETURN' :
+        return 'OP_RETURN'
     else:
         return 'unknown'
