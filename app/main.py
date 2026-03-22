@@ -16,6 +16,9 @@ block_raw = fetch_raw_block(block_hash)
 block_hash = fetch_block_hash(500000)
 block_raw = fetch_raw_block(block_hash)
 
+block_hash = fetch_block_hash(800000)
+block_raw = fetch_raw_block(block_hash)
+
 block_stream = io.BytesIO(block_raw)
 block = Block.parse(block_stream)
 
