@@ -1,20 +1,20 @@
 from src.utils import little_endian_to_int
+from src.utils import int_to_little_endian
+from src.utils import int_to_varint
 from src.utils import read_varint
 from src.utils import hash256
 import io
 
 class Transaction:
-    def __init__(self, version, inputs, outputs, locktime, segwit, raw):
+    def __init__(self, version, inputs, outputs, locktime, segwit):
         self.version = version
         self.inputs = inputs
         self.outputs = outputs
         self.locktime = locktime
         self.segwit = segwit
-        self.raw = raw
 
     @classmethod
     def parse(cls, stream):
-        beginning = stream.tell()
         version_bytes = stream.read(4)
         version = little_endian_to_int(version_bytes)
         raw_segwit = stream.read(2)
@@ -24,7 +24,6 @@ class Transaction:
             bool_segwit = False
             stream = io.BytesIO(version_bytes + raw_segwit + stream.read())
             stream.read(4)
-            beginning = 0
         count_inputs = read_varint(stream)
         inputs = []
         for i in range(count_inputs):
@@ -40,13 +39,28 @@ class Transaction:
                     item_size = read_varint(stream)
                     item = stream.read(item_size)
         locktime = little_endian_to_int(stream.read(4))
-        end = stream.tell()
-        stream.seek(beginning)
-        raw = stream.read(end - beginning)
-        return cls(version, inputs, outputs, locktime, bool_segwit, raw)
+        return cls(version, inputs, outputs, locktime, bool_segwit)
 
     def transaction_id(self):
-        hash = hash256(self.raw)
+        hash = int_to_little_endian(self.version, 4)
+
+        hash += int_to_varint(len(self.inputs))
+        for input in self.inputs:
+            hash += input.prev_tx
+            hash += int_to_little_endian(input.prev_index, 4)
+            hash += int_to_varint(len(input.script_sig))
+            hash += input.script_sig
+            hash += int_to_little_endian(input.sequence, 4)
+
+        hash += int_to_varint(len(self.outputs))
+        for output in self.outputs:
+            hash += int_to_little_endian(output.amount, 8)
+            hash += int_to_varint(len(output.script_pubkey))
+            hash += output.script_pubkey
+
+        hash += int_to_little_endian(self.locktime, 4)
+
+        hash = hash256(hash)
         inverted = hash[::-1].hex()
         return inverted
 

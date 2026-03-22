@@ -25,13 +25,17 @@ print(transaction.segwit)
 print(len(transaction.inputs))
 print(len(transaction.outputs))
 
+print('Block hash')
 print(block.hash())
+print('Transaction ID')
 print(transaction.transaction_id())
 
-print(check_pow(block))
 
+print('Pow')
+print(check_pow(block))
 transaction_id = bytes.fromhex(transaction.transaction_id())[::-1]
 merkle = merkle_root([transaction_id])
+
 
 print(merkle)
 print(block.merkle_root)

@@ -22,3 +22,13 @@ def read_varint(stream):
         return little_endian_to_int(stream.read(4))
     elif integer == 0xFF:
         return little_endian_to_int(stream.read(8))
+
+def int_to_varint(integer):
+    if integer < 0xFD :
+        return int_to_little_endian(integer, 1)
+    elif integer < 0xFFFD :
+        return b'\xfd' + int_to_little_endian(integer, 2)
+    elif integer < 0xFFFFFFFD :
+        return b'\xfe' + int_to_little_endian(integer, 4)
+    elif integer < 0xFFFFFFFFFFFFFFFD :
+        return b'\xff' + int_to_little_endian(integer, 8)
