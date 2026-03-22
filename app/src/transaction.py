@@ -22,8 +22,7 @@ class Transaction:
             bool_segwit = True
         else:
             bool_segwit = False
-            stream = io.BytesIO(version_bytes + raw_segwit + stream.read())
-            stream.read(4)
+            stream.seek(stream.tell() - 2)
         count_inputs = read_varint(stream)
         inputs = []
         for i in range(count_inputs):
