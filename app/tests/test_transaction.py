@@ -11,8 +11,7 @@ class TransactionTest(unittest.TestCase):
     def test_parse_genesis(self):
         stream = io.BytesIO(self.genesis_block)
         block = Block.parse(stream)
-        transaction_count = read_varint(stream)
-        transaction = Transaction.parse(stream)
+        transaction = block.transactions[0]
 
         self.assertEqual(transaction.version, 1)
         self.assertEqual(transaction.segwit, False)
@@ -22,8 +21,7 @@ class TransactionTest(unittest.TestCase):
     def test_transaction_id(self):
         stream = io.BytesIO(self.genesis_block)
         block = Block.parse(stream)
-        transaction_count = read_varint(stream)
-        transaction = Transaction.parse(stream)
+        transaction = block.transactions[0]
 
         self.assertEqual(
             '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b',
