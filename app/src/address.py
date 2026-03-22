@@ -56,6 +56,18 @@ def bech32_encode(hrp, data):
     checksum = bech32_create_checksum(hrp, combined)
     return hrp + '1' + ''.join([alphabet[d] for d in combined + checksum])
 
+def bech32m_create_checksum(hrp, data):
+    values = [ord(c) >> 5 for c in hrp] + [0] + [ord(c) & 31 for c in hrp] + data + [0, 0, 0, 0, 0, 0]
+    polymod = bech32_polymod(values) ^ 0x2bc830a3
+    return [(polymod >> 5 * (5 - i)) & 31 for i in range(6)]
+
+def bech32m_encode(hrp, data):
+    alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
+    data5 = convertbits(data, 8, 5)
+    combined = [1] + data5
+    checksum = bech32m_create_checksum(hrp, combined)
+    return hrp + '1' + ''.join([alphabet[d] for d in combined + checksum])
+
 def hash_to_address(script_type, hash_bytes):
     if script_type == 'P2PKH' :
         return base58check_encode(b'\x00' + hash_bytes)
@@ -63,6 +75,10 @@ def hash_to_address(script_type, hash_bytes):
         return base58check_encode(b'\x05' + hash_bytes)
     elif script_type == 'P2WPKH' :
         return bech32_encode('bc', hash_bytes)
+    elif script_type == 'P2WSH' :
+        return bech32_encode('bc', hash_bytes)
+    elif script_type == 'P2TR' :
+        return bech32m_encode('bc', hash_bytes)
     elif script_type == 'OP_RETURN' :
         return 'OP_RETURN'
     else:

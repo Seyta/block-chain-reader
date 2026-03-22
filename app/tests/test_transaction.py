@@ -1,8 +1,6 @@
 import unittest
 import io
 from src.block import Block
-from src.transaction import Transaction
-from src.utils import read_varint
 
 class TransactionTest(unittest.TestCase):
 

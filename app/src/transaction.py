@@ -3,7 +3,6 @@ from src.utils import int_to_little_endian
 from src.utils import int_to_varint
 from src.utils import read_varint
 from src.utils import hash256
-import io
 
 class Transaction:
     def __init__(self, version, inputs, outputs, locktime, segwit):
