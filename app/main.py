@@ -19,8 +19,10 @@ node = NodeManager()
 node.start(num_peers=2)
 
 tip_hash = fetch_tip_hash()
-bits = fetch_block_json(tip_hash)['bits']
-coinbase = build_coinbase(myaddress)
+tip_json = fetch_block_json(tip_hash)
+bits = tip_json['bits']
+block_height = tip_json['height'] + 1
+coinbase = build_coinbase(myaddress, block_height)
 
 try:
     header = build_block_header(tip_hash, coinbase, bits)
@@ -29,8 +31,10 @@ try:
         try:
             event = node.new_block_queue.get_nowait()
             tip_hash = event['hash']
-            bits = fetch_block_json(tip_hash)['bits']
-            coinbase = build_coinbase(myaddress)
+            tip_json = fetch_block_json(tip_hash)
+            bits = tip_json['bits']
+            block_height = tip_json['height'] + 1
+            coinbase = build_coinbase(myaddress, block_height)
             header = build_block_header(tip_hash, coinbase, bits)
             nonce = 0
             print(f"Nouveau bloc détecté !")

@@ -8,9 +8,10 @@ from src.utils import int_to_varint
 from src.pow import bits_to_target
 
 
-def build_coinbase(address):
+def build_coinbase(address, block_height):
     full = 0xFFFFFFFF
-    sig = b'hello there'
+    height_bytes = int_to_little_endian(block_height, 3)
+    sig = bytes([len(height_bytes)]) + height_bytes + b'hello there'
     transaction_input = TransactionInput(
         b'\x00' * 32,
         full,
@@ -32,7 +33,7 @@ def build_coinbase(address):
 def build_block_header(prev_hash, coinbase_bytes, bits):
     version = int_to_little_endian(0x20000000, 4)
     prev_hash = bytes.fromhex(prev_hash)[::-1]
-    merkle_root = hash256(coinbase_bytes)[::-1]
+    merkle_root = hash256(coinbase_bytes)
     timestamp = int_to_little_endian(int(time.time()), 4)
     bits = int_to_little_endian(bits, 4)
     nonce = int_to_little_endian(0, 4)
