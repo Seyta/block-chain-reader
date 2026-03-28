@@ -12,3 +12,7 @@ def fetch_block_hash(height):
 def fetch_block_json(block_hash):
     url = f"https://blockstream.info/api/block/{block_hash}"
     return json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+
+def fetch_tip_hash():
+    url = f"https://blockstream.info/api/blocks/tip/hash"
+    return urllib.request.urlopen(url).read().decode('utf-8')

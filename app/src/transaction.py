@@ -78,6 +78,10 @@ class TransactionInput:
         sequence = little_endian_to_int(stream.read(4))
         return cls(prev_tx, prev_index, script_sig, sequence)
 
+    def to_bytes(self):
+        return (self.prev_tx + int_to_little_endian(self.prev_index, 4) + int_to_varint(len(self.script_sig))
+                + self.script_sig + int_to_little_endian(self.sequence, 4))
+
 class TransactionOutput:
     def __init__(self, amount, script_pubkey):
         self.amount = amount
@@ -89,3 +93,6 @@ class TransactionOutput:
         script_pubkey = read_varint(stream)
         script_pubkey = stream.read(script_pubkey)
         return cls(amount, script_pubkey)
+
+    def to_bytes(self):
+        return int_to_little_endian(self.amount, 8) + int_to_varint(len(self.script_pubkey)) + self.script_pubkey

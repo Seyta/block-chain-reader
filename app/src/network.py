@@ -87,5 +87,15 @@ class BitcoinNode:
             if command == 'block':
                 return Block.parse(io.BytesIO(data))
 
+    def submit_block(self, header_bytes, coinbase_bytes):
+        payload = header_bytes + int_to_varint(1) + coinbase_bytes
+        message = NetworkMessage('block', payload)
+        self.send(message)
+        try:
+            command, data = self.receive()
+            print(f'Response : {command}')
+        except socket.timeout:
+            print('Pas de rejet — bloc probablement accepté !')
+
     def close(self):
         self.socket.close()
