@@ -1,7 +1,10 @@
+import logging
 import socket
 import threading
 from src.network import NetworkMessage, create_version_message
 from src.utils import little_endian_to_int
+
+logger = logging.getLogger(__name__)
 
 class PeerConnection :
 
@@ -23,12 +26,12 @@ class PeerConnection :
         self._receive()
         self.send(NetworkMessage('verack', b''))
         self._receive()
-        print("Handshake réussi !")
+        logger.info(f"Handshake réussi avec {self.host}")
 
         self._running.set()
         self._thread = threading.Thread(target=self._listen_loop, daemon=True)
         self._thread.start()
-        print(f"Connecté à {self.host}")
+        logger.info(f"Connecté à {self.host}")
 
     def send(self, message):
         with self._send_lock:
@@ -58,6 +61,7 @@ class PeerConnection :
                 if command :
                     self.message_callback(self, command, payload)
             except (OSError, socket.timeout):
+                logger.warning(f"Déconnecté de {self.host}")
                 self._running.clear()
                 break
 

@@ -1,9 +1,16 @@
+import logging
 import queue
 from src.fetcher import fetch_tip_hash, fetch_block_json
 from src.miner import build_coinbase, build_block_header, mine_batch
 from src.node_manager import NodeManager
 from src.utils import int_to_little_endian
 from src.address import bech32_decode
+
+logging.basicConfig(
+    filename='/app/data/network.log',
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(message)s'
+)
 
 myaddress = bech32_decode('bc1q4djqwazqkjmjpqrmz85da6snsz6ctxyhuajjze').hex()
 BATCH = 100_000
