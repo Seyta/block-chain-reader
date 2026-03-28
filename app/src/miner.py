@@ -20,7 +20,7 @@ def build_coinbase(address):
 
     transaction_output = TransactionOutput(
         312500000,
-        b'\x76\xa9\x14' + bytes.fromhex('62e907b15cbf27d5425399ebf6f0fb50ebb88f18') + b'\x88\xac' #hash160 of 1A1zP1eP5QGefi2DMPTfTL5SLmv7Divfna (satoshi)
+        b'\x76\xa9\x14' + bytes.fromhex(address) + b'\x88\xac'
     )
 
     version = int_to_little_endian(1, 4)

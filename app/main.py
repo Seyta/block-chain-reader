@@ -3,7 +3,9 @@ from src.fetcher import fetch_tip_hash, fetch_block_json
 from src.miner import build_coinbase, build_block_header, mine_batch
 from src.node_manager import NodeManager
 from src.utils import int_to_little_endian
+from src.address import bech32_decode
 
+myaddress = bech32_decode('bc1q4djqwazqkjmjpqrmz85da6snsz6ctxyhuajjze').hex()
 BATCH = 100_000
 
 node = NodeManager()
@@ -11,20 +13,17 @@ node.start(num_peers=2)
 
 tip_hash = fetch_tip_hash()
 bits = fetch_block_json(tip_hash)['bits']
-coinbase = build_coinbase(None) # TODO mettre une vrai addresse
-header = build_block_header(tip_hash, coinbase, bits)
-nonce_start = 0
+coinbase = build_coinbase(myaddress)
 
 try:
     header = build_block_header(tip_hash, coinbase, bits)
-    print(header.hex())
     nonce = 0
     while True:
         try:
             event = node.new_block_queue.get_nowait()
             tip_hash = event['hash']
             bits = fetch_block_json(tip_hash)['bits']
-            coinbase = build_coinbase(None)
+            coinbase = build_coinbase(myaddress)
             header = build_block_header(tip_hash, coinbase, bits)
             nonce = 0
             print(f"Nouveau bloc détecté !")

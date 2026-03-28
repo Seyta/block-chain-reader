@@ -20,6 +20,19 @@ def base58check_encode(payload):
 
     return result
 
+def base58check_decode(payload):
+    alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+    result = 0
+    for a in payload:
+        index = alphabet.index(a)
+        result = result * 58 + index
+    bytes = result.to_bytes(25, 'big')
+    checksum = hash256(bytes[:21])[:4] == bytes[21:]
+    if not checksum :
+        raise ValueError('Check sum does not match')
+    return bytes[1:21]
+
+
 def convertbits(data, frombits, tobits):
     acc = 0
     bits = 0
@@ -67,6 +80,16 @@ def bech32m_encode(hrp, data):
     combined = [1] + data5
     checksum = bech32m_create_checksum(hrp, combined)
     return hrp + '1' + ''.join([alphabet[d] for d in combined + checksum])
+
+def bech32_decode(address):
+    alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
+    hrp, data_str = address.rsplit('1', 1)
+    data = [alphabet.index(c) for c in data_str]
+    data = data[1::]
+    data = data[:-6:]
+    converted = convertbits(data, 5, 8)
+
+    return bytes(converted)
 
 def hash_to_address(script_type, hash_bytes):
     if script_type == 'P2PKH' :
