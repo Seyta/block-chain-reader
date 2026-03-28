@@ -49,3 +49,15 @@ def mine(header_bytes, target, nonce_range):
             return nonce, hash
 
     return None, None
+
+def mine_batch(header_bytes, start_nonce, nonce_count):
+    target = bits_to_target(little_endian_to_int(header_bytes[72:76]))
+    for nonce in range(start_nonce, start_nonce+nonce_count):
+        header_candidate = header_bytes[:76] + int_to_little_endian(nonce, 4)
+        hash = hash256(header_candidate)
+        hash_int = int.from_bytes(hash, 'little')
+        if hash_int < target:
+            return nonce, hash
+
+    return None, None
+
