@@ -16,25 +16,32 @@ class NodeManager:
         self.peers_lock = threading.Lock()
         self.new_block_queue = queue.Queue()
         self.num_peers = 3
+        self._reconnect_lock = threading.Lock()
 
-    def start(self, num_peers = 3):
+    def start(self, num_peers=3):
         seeds = ['seed.bitcoin.sipa.be', 'dnsseed.bluematt.me']
         added = 0
         for seed in seeds:
-            ips = socket.getaddrinfo(seed, 8333)
-            if ips is None:
-                continue
-            ip = ips[0][4][0]
-            peer_connection = PeerConnection(ip, 8333, self._on_message)
             try:
-                peer_connection.connect()
+                ips = socket.getaddrinfo(seed, 8333)
             except:
                 continue
-            self.peers.append(peer_connection)
-            added = added + 1
-
-            if added >= num_peers:
-                break
+            for ip_info in ips:
+                ip = ip_info[4][0]
+                with self.peers_lock:
+                    already_connected = any(p.host == ip for p in self.peers)
+                if already_connected:
+                    continue
+                peer_connection = PeerConnection(ip, 8333, self._on_message)
+                try:
+                    peer_connection.connect()
+                except:
+                    continue
+                with self.peers_lock:
+                    self.peers.append(peer_connection)
+                added += 1
+                if added >= num_peers:
+                    return
 
     def _on_message(self, peer, command, payload):
         logger.debug(f"[{peer.host}] {command}")
@@ -71,6 +78,12 @@ class NodeManager:
                 peer.close()
 
     def _check_and_reconnect(self):
-        count = len([p for p in self.peers if p.is_alive])
+        with self.peers_lock:
+            self.peers = [p for p in self.peers if p.is_alive]
+            count = len(self.peers)
         if count < self.num_peers:
-            self.start(self.num_peers - count)
+            if self._reconnect_lock.acquire(blocking=False):
+                try:
+                    self.start(self.num_peers - count)
+                finally:
+                    self._reconnect_lock.release()

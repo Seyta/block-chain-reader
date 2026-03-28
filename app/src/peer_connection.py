@@ -28,6 +28,7 @@ class PeerConnection :
         self._receive()
         logger.info(f"Handshake réussi avec {self.host}")
 
+        self._socket.settimeout(300)
         self._running.set()
         self._thread = threading.Thread(target=self._listen_loop, daemon=True)
         self._thread.start()

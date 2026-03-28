@@ -16,7 +16,7 @@ myaddress = bech32_decode('bc1q4djqwazqkjmjpqrmz85da6snsz6ctxyhuajjze').hex()
 BATCH = 100_000
 
 node = NodeManager()
-node.start(num_peers=2)
+node.start()
 
 tip_hash = fetch_tip_hash()
 tip_json = fetch_block_json(tip_hash)
@@ -43,6 +43,7 @@ try:
         correct_nonce, hash = mine_batch(header, nonce, BATCH)
         if correct_nonce is not None :
            print("Nonce trouvé !!")
+           logging.info(f"Nonce trouvé : {correct_nonce} — hash : {hash[::-1].hex()}")
            node.submit_block(header[:76] + int_to_little_endian(correct_nonce, 4), coinbase)
         else :
             nonce += BATCH
