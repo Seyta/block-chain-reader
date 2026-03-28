@@ -64,6 +64,7 @@ class PeerConnection :
                 logger.warning(f"Déconnecté de {self.host}")
                 self._running.clear()
                 break
+        self.message_callback(self, 'disconnect', b'')
 
     def close(self):
         self._running.clear()

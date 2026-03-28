@@ -51,7 +51,6 @@ class NodeManager:
             type = stream.read(4)
             hash = stream.read(32)
 
-            logger.debug(f"inv type={little_endian_to_int(type)}")
             if little_endian_to_int(type) == 2 : #MSG_BLOCK
                 logger.info(f"Nouveau bloc annoncé : {hash[::-1].hex()}")
                 self.new_block_queue.put({'hash': hash[::-1].hex()})
